@@ -86,7 +86,7 @@ else:
 # 3. Email Sending (Using GitHub Secrets)
 SENDER_EMAIL = os.environ.get('EMAIL_USER')
 SENDER_PASSWORD = os.environ.get('EMAIL_PASS')
-RECEIVER_EMAIL = "ismat.saifi@rosierfoods.com" # Yahan receive karne wale ka email likhein
+RECEIVER_EMAIL = "priyansh.khandelwal@rosierfoods.com" # Yahan receive karne wale ka email likhein
 
 if not SENDER_EMAIL or not SENDER_PASSWORD:
     print("Error: GitHub Secrets set nahi hain.")
