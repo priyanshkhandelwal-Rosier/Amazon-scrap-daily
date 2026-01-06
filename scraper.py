@@ -96,7 +96,7 @@ msg = MIMEMultipart()
 msg['From'] = SENDER_EMAIL
 msg['To'] = RECEIVER_EMAIL
 msg['Subject'] = "Daily Report: Amazon Scrap Data"
-msg.attach(MIMEText("Attached is the processed Excel file from Amazon.html", 'plain'))
+msg.attach(MIMEText("Hi Automailer PFA Amazon Rosier products", 'plain'))
 
 with open(file_name, "rb") as attachment:
     part = MIMEBase('application', 'octet-stream')
