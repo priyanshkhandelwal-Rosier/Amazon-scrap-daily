@@ -39,7 +39,7 @@ for item in product_divs:
         if h2_tag:
             parent_link = h2_tag.find_parent('a')
             if parent_link:
-                product_link = "https://www.amazon.in" + parent_link['href']
+                product_link = "https://www.amazon.in/s?k=rosier+foods&crid=84CJ0Q6WFCI4&sprefix=rosier+foo%2Caps%2C481&ref=nb_sb_noss_2" + parent_link['href']
 
         # MRP
         mrp_text = "N/A"
