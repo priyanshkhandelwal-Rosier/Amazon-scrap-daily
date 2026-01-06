@@ -86,7 +86,7 @@ else:
 # 3. Email Sending (Using GitHub Secrets)
 SENDER_EMAIL = os.environ.get('EMAIL_USER')
 SENDER_PASSWORD = os.environ.get('EMAIL_PASS')
-RECEIVER_EMAIL = "receiver@gmail.com" # Yahan receive karne wale ka email likhein
+RECEIVER_EMAIL = "ismat.saifi@rosierfoods.com" # Yahan receive karne wale ka email likhein
 
 if not SENDER_EMAIL or not SENDER_PASSWORD:
     print("Error: GitHub Secrets set nahi hain.")
@@ -95,8 +95,11 @@ if not SENDER_EMAIL or not SENDER_PASSWORD:
 msg = MIMEMultipart()
 msg['From'] = SENDER_EMAIL
 msg['To'] = RECEIVER_EMAIL
-msg['Subject'] = "Daily Report: Amazon HTML File Data"
-msg.attach(MIMEText("Attached is the processed Excel file from Amazon.html", 'plain'))
+msg['Subject'] = "Daily Report: Amazon Scrap Data"
+msg.attach(MIMEText("Hi Automailer,
+
+PFA Amazon Rosier foods Product Scrapping.
+Thanks!", 'plain'))
 
 with open(file_name, "rb") as attachment:
     part = MIMEBase('application', 'octet-stream')
