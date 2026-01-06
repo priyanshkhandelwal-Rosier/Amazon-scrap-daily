@@ -1,0 +1,31 @@
+name: Daily Amazon Scraper
+
+on:
+  schedule:
+    # 17:40 IST = 12:10 UTC (GitHub UTC use krta hai)
+    # Minute Hour Day Month Weekday
+    - cron: '10 12 * * *'
+  workflow_dispatch: # Ye button deta hai manual run krne ke liye
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Scraper Script
+        env: 
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+        run: python scraper.py
