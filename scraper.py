@@ -9,7 +9,14 @@ from openpyxl import load_workbook
 from openpyxl.styles import Font
 import os
 
-# 1. HTML File Load (Jo GitHub repo me hogi)
+# ---------------- CONFIGURATION ----------------
+SENDER_EMAIL = os.environ.get('EMAIL_USER')
+SENDER_PASSWORD = os.environ.get('EMAIL_PASS')
+RECEIVER_EMAIL = "priyansh.khandelwal@rosierfoods.com"
+FILE_NAME = "Rosier_Report.xlsx"
+# -----------------------------------------------
+
+# 1. HTML File Load
 try:
     with open("Amazon.html", "r", encoding="utf-8") as file:
         html_content = file.read()
@@ -34,12 +41,13 @@ for item in product_divs:
         if h2_tag and h2_tag.span:
             name_text = h2_tag.span.get_text().strip()
 
-        # Link Extraction
+        # --- LINK EXTRACTION (FIXED HERE) ---
         product_link = None
         if h2_tag:
             parent_link = h2_tag.find_parent('a')
             if parent_link:
-                product_link = "https://www.amazon.in/s?k=rosier+foods&crid=84CJ0Q6WFCI4&sprefix=rosier+foo%2Caps%2C481&ref=nb_sb_noss_2" + parent_link['href']
+                # GALTI YAHAN THI: Sirf amazon.in jodna hai, search query nahi
+                product_link = "https://www.amazon.in" + parent_link['href']
 
         # MRP
         mrp_text = "N/A"
@@ -62,32 +70,37 @@ for item in product_divs:
             'Hidden_URL': product_link
         })
 
-# 2. Excel Creation with Fixed Hyperlinks
-file_name = "Rosier_Report.xlsx"
+# 2. Excel Creation with Working Hyperlinks
 if products_data:
     df = pd.DataFrame(products_data)
-    df.to_excel(file_name, index=False)
+    df.to_excel(FILE_NAME, index=False)
     
-    # Fix Links on MRP column
-    wb = load_workbook(file_name)
+    # Fix Links using OpenPyXL
+    wb = load_workbook(FILE_NAME)
     ws = wb.active
+    
+    # Row 2 se start karenge
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
-        mrp_cell = row[2] # Column C
-        url_cell = row[4] # Column E
+        # --- CONFIG: Kahan Link Lagana Hai? ---
+        # Column B (Product Name) = row[1]
+        # Column C (Price/MRP)    = row[2]
+        
+        target_cell = row[1]  # <--- Maine Product Name par link lagaya hai (Standard practice)
+        # Agar Price par lagana hai to upar wali line ko 'row[2]' kar dein
+        
+        url_cell = row[4]     # Column E (Hidden_URL)
+        
         if url_cell.value:
-            mrp_cell.hyperlink = url_cell.value
-            mrp_cell.font = Font(color="0000FF", underline="single")
+            target_cell.hyperlink = url_cell.value
+            target_cell.font = Font(color="0000FF", underline="single")
+            
     ws.delete_cols(5) # Remove URL column
-    wb.save(file_name)
+    wb.save(FILE_NAME)
 else:
     print("No ROSIER products found in the HTML file.")
     exit()
 
-# 3. Email Sending (Using GitHub Secrets)
-SENDER_EMAIL = os.environ.get('EMAIL_USER')
-SENDER_PASSWORD = os.environ.get('EMAIL_PASS')
-RECEIVER_EMAIL = "priyansh.khandelwal@rosierfoods.com" # Yahan receive karne wale ka email likhein
-
+# 3. Email Sending
 if not SENDER_EMAIL or not SENDER_PASSWORD:
     print("Error: GitHub Secrets set nahi hain.")
     exit()
@@ -95,14 +108,14 @@ if not SENDER_EMAIL or not SENDER_PASSWORD:
 msg = MIMEMultipart()
 msg['From'] = SENDER_EMAIL
 msg['To'] = RECEIVER_EMAIL
-msg['Subject'] = "Daily Report: Amazon Scrap Data"
-msg.attach(MIMEText("Hi Automailer PFA Amazon Rosier products", 'plain'))
+msg['Subject'] = "Daily Report: Amazon Scrap Data (Fixed Links)"
+msg.attach(MIMEText("Hi Automailer,\n\nPFA Amazon Rosier products.", 'plain'))
 
-with open(file_name, "rb") as attachment:
+with open(FILE_NAME, "rb") as attachment:
     part = MIMEBase('application', 'octet-stream')
     part.set_payload(attachment.read())
     encoders.encode_base64(part)
-    part.add_header('Content-Disposition', f"attachment; filename= {file_name}")
+    part.add_header('Content-Disposition', f"attachment; filename= {FILE_NAME}")
     msg.attach(part)
 
 server = smtplib.SMTP('smtp.gmail.com', 587)
