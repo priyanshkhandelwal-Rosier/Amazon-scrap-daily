@@ -12,7 +12,7 @@ import os
 # ---------------- CONFIGURATION ----------------
 SENDER_EMAIL = os.environ.get('EMAIL_USER')
 SENDER_PASSWORD = os.environ.get('EMAIL_PASS')
-RECEIVER_EMAIL = "priyansh.khandelwal@rosierfoods.com"
+RECEIVER_EMAIL = "Rosierfoods@gmail.com"
 FILE_NAME = "Rosier_Report.xlsx"
 # -----------------------------------------------
 
