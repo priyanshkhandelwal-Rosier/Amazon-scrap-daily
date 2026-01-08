@@ -121,7 +121,7 @@ msg = MIMEMultipart()
 msg['From'] = SENDER_EMAIL
 msg['To'] = RECEIVER_EMAIL
 msg['Subject'] = "Daily Report: Amazon Scrap Data"
-msg.attach(MIMEText("Hi Automailer,\n\nPFA Amazon Rosier products. Links are fixed now.", 'plain'))
+msg.attach(MIMEText("Hi Automailer,\n\nPFA Amazon Rosier products", 'plain'))
 
 with open(FILE_NAME, "rb") as attachment:
     part = MIMEBase('application', 'octet-stream')
