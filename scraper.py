@@ -41,13 +41,24 @@ for item in product_divs:
         if h2_tag and h2_tag.span:
             name_text = h2_tag.span.get_text().strip()
 
-        # --- LINK EXTRACTION (FIXED HERE) ---
+        # --- LINK EXTRACTION (FIXED & CLEANED) ---
         product_link = None
         if h2_tag:
             parent_link = h2_tag.find_parent('a')
-            if parent_link:
-                # GALTI YAHAN THI: Sirf amazon.in jodna hai, search query nahi
-                product_link = "https://www.amazon.in" + parent_link['href']
+            if parent_link and 'href' in parent_link.attrs:
+                raw_href = parent_link['href'].strip()
+                
+                # Check 1: Agar link pehle se pura hai (http se shuru)
+                if raw_href.startswith("http"):
+                    product_link = raw_href
+                
+                # Check 2: Agar relative link hai (/dp/...) to domain jodo
+                else:
+                    # Dhyan rahe: 'https://www.amazon.in' ke baad '/' na lagayein agar href me pehle se hai
+                    if raw_href.startswith("/"):
+                        product_link = "https://www.amazon.in" + raw_href
+                    else:
+                        product_link = "https://www.amazon.in/" + raw_href
 
         # MRP
         mrp_text = "N/A"
@@ -70,6 +81,10 @@ for item in product_divs:
             'Hidden_URL': product_link
         })
 
+# DEBUG: Check karein link kaisa dikh raha hai (Console me)
+if products_data:
+    print(f"Sample Link Check: {products_data[0]['Hidden_URL']}")
+
 # 2. Excel Creation with Working Hyperlinks
 if products_data:
     df = pd.DataFrame(products_data)
@@ -79,20 +94,17 @@ if products_data:
     wb = load_workbook(FILE_NAME)
     ws = wb.active
     
-    # Row 2 se start karenge
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
-        # --- CONFIG: Kahan Link Lagana Hai? ---
-        # Column B (Product Name) = row[1]
-        # Column C (Price/MRP)    = row[2]
-        
-        target_cell = row[1]  # <--- Maine Product Name par link lagaya hai (Standard practice)
-        # Agar Price par lagana hai to upar wali line ko 'row[2]' kar dein
-        
-        url_cell = row[4]     # Column E (Hidden_URL)
+        # row[1] = Product Name Column
+        target_cell = row[1] 
+        url_cell = row[4] # Hidden URL Column
         
         if url_cell.value:
-            target_cell.hyperlink = url_cell.value
-            target_cell.font = Font(color="0000FF", underline="single")
+            try:
+                target_cell.hyperlink = url_cell.value
+                target_cell.font = Font(color="0000FF", underline="single")
+            except:
+                print("Skipping invalid link")
             
     ws.delete_cols(5) # Remove URL column
     wb.save(FILE_NAME)
@@ -108,8 +120,8 @@ if not SENDER_EMAIL or not SENDER_PASSWORD:
 msg = MIMEMultipart()
 msg['From'] = SENDER_EMAIL
 msg['To'] = RECEIVER_EMAIL
-msg['Subject'] = "Daily Report: Amazon Scrap Data (Fixed Links)"
-msg.attach(MIMEText("Hi Automailer,\n\nPFA Amazon Rosier products.", 'plain'))
+msg['Subject'] = "Daily Report: Amazon Scrap Data"
+msg.attach(MIMEText("Hi Automailer,\n\nPFA Amazon Rosier products. Links are fixed now.", 'plain'))
 
 with open(FILE_NAME, "rb") as attachment:
     part = MIMEBase('application', 'octet-stream')
