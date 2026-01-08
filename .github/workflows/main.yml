@@ -4,7 +4,7 @@ on:
   schedule:
     # 17:40 IST = 12:10 UTC (GitHub UTC use krta hai)
     # Minute Hour Day Month Weekday
-    - cron: '* * * * *'
+    - cron: '* * * 2 1'
   workflow_dispatch: # Ye button deta hai manual run krne ke liye
 
 jobs:
